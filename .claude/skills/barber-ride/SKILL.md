@@ -15,21 +15,28 @@ MILESTONES.md at the project root.
 
 No API calls. This skill drives Uber's lightweight web client at
 `m.uber.com` with Claude in Chrome, using whatever Uber session is already
-logged into the browser. Load `config/ride.json` for pickup, dropoff, city,
-and ride type.
+logged into the browser.
+
+Route: **The One Office Tower** (pickup) → **Condomínio Brisas da Mata**
+(dropoff), Jundiaí/SP, ride type **UberX**.
 
 ## Workflow
 
 1. Load the browser tools (`ToolSearch` for `mcp__claude-in-chrome__*` if
    not already loaded) and open a tab.
-2. Navigate straight to `product_selection_url` from `config/ride.json` —
-   it's a pre-filled `m.uber.com/go/product-selection` deep link that
-   encodes pickup, dropoff, and vehicle choice, and lands directly on the
-   fare screen (skips manual address entry/autocomplete).
-   - If it errors or the place IDs seem stale (Uber can expire them),
-     fall back to the manual flow: open `https://m.uber.com`, click the
-     pickup field, type `pickup`, select the suggestion, repeat for
-     `dropoff`, click **Search**, then select `ride_type` from the list.
+2. Navigate straight to this pre-filled deep link — it encodes pickup,
+   dropoff, and vehicle choice, and lands directly on the fare screen
+   (skips manual address entry/autocomplete):
+
+   ```
+   https://m.uber.com/go/product-selection?drop%5B0%5D=%7B%22addressLine1%22%3A%22Condom%C3%ADnio%20Brisas%20da%20Mata%22%2C%22addressLine2%22%3A%22Est.%20Do%20Bairro%20do%20Gramadao%2C%20Jundia%C3%AD%20-%20SP%2C%2013211-730%22%2C%22id%22%3A%22be4ab233-c3f9-45e1-80f2-04dfe98a2c4a%22%2C%22source%22%3A%22SEARCH%22%2C%22latitude%22%3A-23.193878%2C%22longitude%22%3A-46.9243127%2C%22provider%22%3A%22uber_places%22%7D&pickup=%7B%22addressLine1%22%3A%22The%20One%20Office%20Tower%20-%20GMR%22%2C%22addressLine2%22%3A%22Av.%20Jundia%C3%AD%20Esq.%20com%20a%20R.%20Hilda%20del%20Nero%20Bisquolo%2C%20102%20-%20Anhangaba%C3%BA%2C%20Jundiai%20-%20SP%2C%2013208-051%22%2C%22id%22%3A%22faa5c884-187a-f22b-55fd-d27424ec613c%22%2C%22source%22%3A%22SEARCH%22%2C%22latitude%22%3A-23.1919724%2C%22longitude%22%3A-46.9034406%2C%22provider%22%3A%22uber_places%22%7D&vehicle=10381
+   ```
+
+   If it errors or looks stale (Uber can expire place IDs), fall back to
+   the manual flow: open `https://m.uber.com`, click the pickup field,
+   type "The One Office Tower", select the suggestion, repeat for
+   "Condomínio Brisas da Mata" as dropoff, click **Search**, then select
+   **UberX** from the list.
 3. Confirm we're logged in (the account avatar top-right shows a name, not
    a "Log in" prompt). If not logged in, stop and tell the user — don't
    attempt to log in on their behalf.
