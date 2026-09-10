@@ -1,5 +1,13 @@
 # Barber Ride Automation
 
+> **Update (2026-09-10):** The Uber Riders API is no longer practically
+> reachable for a self-serve personal project — the current developer
+> dashboard is restructured around internal/enterprise integrations, and a
+> registered test app hit `invalid_client` on the standard OAuth flow.
+> Per the "Alternatives Considered" section below, the project pivoted to
+> **browser automation** against `m.uber.com` (Uber's lightweight web
+> client) instead of the Riders API. See MILESTONES.md for the current plan.
+
 ## Goal
 
 Build a small personal project that:

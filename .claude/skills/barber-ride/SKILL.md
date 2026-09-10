@@ -15,6 +15,6 @@ proves the conversational trigger and response loop work.
 1. Run `scripts/dummy_response.py` and show its output to the user as the
    result of the skill.
 
-Future milestones will replace this stub: Uber auth (M2), fare estimate
-(M3), ride request (M4), tracking (M5), notification (M6), live dry run
-(M7). See MILESTONES.md at the project root.
+Future milestones will replace this stub: browser login to m.uber.com (M2),
+fare estimate (M3), ride request (M4), tracking (M5), notification (M6),
+live dry run (M7). See MILESTONES.md at the project root.
