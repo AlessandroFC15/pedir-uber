@@ -2,5 +2,6 @@
   "city": "Jundiaí, SP",
   "pickup": "The One Office Tower",
   "dropoff": "Condomínio Brisas da Mata",
-  "ride_type": "UberX"
+  "ride_type": "UberX",
+  "product_selection_url": "https://m.uber.com/go/product-selection?drop%5B0%5D=%7B%22addressLine1%22%3A%22Condom%C3%ADnio%20Brisas%20da%20Mata%22%2C%22addressLine2%22%3A%22Est.%20Do%20Bairro%20do%20Gramadao%2C%20Jundia%C3%AD%20-%20SP%2C%2013211-730%22%2C%22id%22%3A%22be4ab233-c3f9-45e1-80f2-04dfe98a2c4a%22%2C%22source%22%3A%22SEARCH%22%2C%22latitude%22%3A-23.193878%2C%22longitude%22%3A-46.9243127%2C%22provider%22%3A%22uber_places%22%7D&pickup=%7B%22addressLine1%22%3A%22The%20One%20Office%20Tower%20-%20GMR%22%2C%22addressLine2%22%3A%22Av.%20Jundia%C3%AD%20Esq.%20com%20a%20R.%20Hilda%20del%20Nero%20Bisquolo%2C%20102%20-%20Anhangaba%C3%BA%2C%20Jundiai%20-%20SP%2C%2013208-051%22%2C%22id%22%3A%22faa5c884-187a-f22b-55fd-d27424ec613c%22%2C%22source%22%3A%22SEARCH%22%2C%22latitude%22%3A-23.1919724%2C%22longitude%22%3A-46.9034406%2C%22provider%22%3A%22uber_places%22%7D&vehicle=10381"
 }

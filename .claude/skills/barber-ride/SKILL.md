@@ -21,26 +21,28 @@ and ride type.
 ## Workflow
 
 1. Load the browser tools (`ToolSearch` for `mcp__claude-in-chrome__*` if
-   not already loaded) and open a tab at `https://m.uber.com`.
-2. Confirm we're logged in (the account avatar top-right should show a
-   name, not a "Log in" prompt). If not logged in, stop and tell the user —
-   don't attempt to log in on their behalf.
-3. Click the pickup location field, type the `pickup` value from
-   `config/ride.json`, and select the matching autocomplete suggestion.
-4. Click the dropoff location field, type the `dropoff` value, and select
-   the matching suggestion.
-5. Click **Search** to load ride options.
-6. Select the ride type matching `ride_type` (e.g. UberX) from the list.
-7. Read the fare shown next to the selected ride type and **show it to the
+   not already loaded) and open a tab.
+2. Navigate straight to `product_selection_url` from `config/ride.json` —
+   it's a pre-filled `m.uber.com/go/product-selection` deep link that
+   encodes pickup, dropoff, and vehicle choice, and lands directly on the
+   fare screen (skips manual address entry/autocomplete).
+   - If it errors or the place IDs seem stale (Uber can expire them),
+     fall back to the manual flow: open `https://m.uber.com`, click the
+     pickup field, type `pickup`, select the suggestion, repeat for
+     `dropoff`, click **Search**, then select `ride_type` from the list.
+3. Confirm we're logged in (the account avatar top-right shows a name, not
+   a "Log in" prompt). If not logged in, stop and tell the user — don't
+   attempt to log in on their behalf.
+4. Read the fare shown next to the selected ride type and **show it to the
    user, asking for explicit confirmation before requesting** — this is a
    real purchase, never request without a yes.
-8. Only after the user confirms: click **Request \<ride_type\>** to book
+5. Only after the user confirms: click **Request \<ride_type\>** to book
    the ride.
-9. Poll the post-request screen for driver assignment (name, vehicle,
+6. Poll the post-request screen for driver assignment (name, vehicle,
    plate, ETA).
-10. Once a driver is assigned, send the barber the trip details (channel
-    TBD — milestone 6).
-11. Report completion status back to the user.
+7. Once a driver is assigned, send the barber the trip details (channel
+   TBD — milestone 6).
+8. Report completion status back to the user.
 
 ## Notes
 
