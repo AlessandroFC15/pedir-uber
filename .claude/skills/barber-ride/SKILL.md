@@ -125,10 +125,34 @@ with the user before sending any WhatsApp message — just send it.
    know, unless the page has visibly changed since. From this point on,
    run the rest of this workflow autonomously — no further check-ins with
    the user (see Autonomy boundary above).
-7. Take a screenshot of the post-request screen. Wait for a driver to be
-   assigned (name, vehicle, plate, ETA visible) — if still searching,
-   `wait` a few seconds and screenshot again.
-8. As soon as a driver is assigned, send the barber a WhatsApp message
+7. **Confirm the URL actually changed before doing anything else.** A
+   successful request navigates the tab through two distinct routes
+   (verified 2026-09-15, both from a real request):
+   - `m.uber.com/go/dispatching?...&trip_uuid=<uuid>&...` first — still
+     searching for a driver, none assigned yet. Same query params as the
+     product-selection deep link, plus `trip_uuid`.
+   - `m.uber.com/go/on-trip?trip_uuid=<uuid>` once a driver accepts — the
+     tracking screen with driver details.
+   Check `tabId`'s URL (it's in every tool result's Tab Context), don't
+   just assume. If the URL is still `/go/product-selection` and a "You
+   have reached the maximum number of ongoing trips" dialog appears, that
+   almost certainly means the request *did* succeed (a trip now exists)
+   but the tab didn't navigate along with it — don't treat this as
+   failure. Dismiss the dialog and check `Activity` (or retry navigating
+   to `/go/home` and back) to find the live trip and its `trip_uuid`.
+8. Take a screenshot. If the URL is `/go/dispatching`, still searching for
+   a driver — `wait` a few seconds and screenshot again (don't send any
+   WhatsApp message yet, nothing to report). Once the URL becomes
+   `/go/on-trip`, a driver is assigned and the page shows (verified
+   2026-09-15):
+   - Header: `"Pickup in <N> mins"`
+   - Driver card: photo, star rating, name, plate, vehicle model
+   - `Send a message...` / call buttons (not used by this skill)
+   - Pickup/dropoff addresses with `Change` links
+   - Fare and payment method
+   - A `Cancel ride` button — **never click this**; it's for the human
+     user only, not something this skill triggers itself.
+9. As soon as a driver is assigned, send the barber a WhatsApp message
    with the trip details, using the WhatsApp tab already opened in step 2
    (see "Sending a WhatsApp message" below):
 
@@ -139,33 +163,47 @@ with the user before sending any WhatsApp message — just send it.
    Veículo: <vehicle> (placa <plate>)
    Chegada: <ETA>
    ```
-9. Keep polling the tracking screen (screenshot every ~30s via `wait` +
-   screenshot) and send exactly one WhatsApp message per state
-   transition — don't repeat a message for a state already notified:
-   - ETA drops to a few minutes (≈3 min or less): `"O motorista está a
-     poucos minutos de distância! 🕐"`
-   - Driver is arriving/very close (≈1 min or "arriving now" shown):
-     `"O motorista está chegando, já tá bem pertinho! 📍"`
-   - Driver cancels (page shows searching for a new driver, or a
-     cancellation notice): `"Opa, o motorista cancelou a corrida. Já
-     estou chamando outro pra você, só um instante! 🔄"` — then go back to
-     step 7 (wait for new assignment) and use this message for the new
-     driver instead of the step 8 one:
-     ```
-     Encontrei um novo motorista! 🚗
+10. Keep polling the tracking screen (screenshot every ~30s via `wait` +
+    screenshot) and send exactly one WhatsApp message per state
+    transition — don't repeat a message for a state already notified:
+    - ETA drops to a few minutes (≈3 min or less): `"O motorista está a
+      poucos minutos de distância! 🕐"` (verified 2026-09-15 against a
+      real trip: fired correctly around "Pickup in 2 mins")
+    - Driver is arriving/very close (≈1 min or "arriving now" shown):
+      `"O motorista está chegando, já tá bem pertinho! 📍"` (verified
+      2026-09-15 at "Pickup in 1 min")
+    - **The driver cancels mid-trip** (a cancellation notice appears on
+      the `/go/on-trip` page itself, and Uber auto-searches for a
+      replacement without leaving that page/trip — not yet observed
+      live, inferred from normal Uber behavior): send `"Opa, o motorista
+      cancelou a corrida. Já estou chamando outro pra você, só um
+      instante! 🔄"`, then go back to step 8 (wait for the new
+      assignment) and use this message instead of the step 9 one once
+      assigned:
+      ```
+      Encontrei um novo motorista! 🚗
 
-     Motorista: <name>
-     Veículo: <vehicle> (placa <plate>)
-     Chegada: <ETA>
-     ```
-   - Trip completes (driver arrived / ride ends): stop polling.
-10. Report final completion status back to the user, in Portuguese, once
+      Motorista: <name>
+      Veículo: <vehicle> (placa <plate>)
+      Chegada: <ETA>
+      ```
+      **This is distinct from the user cancelling the ride themselves**
+      (clicking `Cancel ride`, which this skill never does) — that
+      returns the tab to `/go/product-selection`, a dead end with no
+      auto-rebooking (verified 2026-09-15: cancelling manually just
+      dumps you back at the full ride list, exactly like a fresh session).
+      If you land back on `/go/product-selection` after having been on
+      `/go/on-trip`, treat it as the trip having ended/been cancelled —
+      report that to the user, don't try to auto-rebook.
+    - Trip completes (driver arrived / ride ends): stop polling.
+11. Report final completion status back to the user, in Portuguese, once
     the loop above ends.
 
 ## Sending a WhatsApp message
 
-Verified working end-to-end 2026-09-15 (real message sent and received).
-Use `web.whatsapp.com`'s `send` URL directly — not `wa.me`, which detours
+Verified working end-to-end 2026-09-15 against a real trip (driver
+assigned + approaching + arriving messages all sent and delivered). Use
+`web.whatsapp.com`'s `send` URL directly — not `wa.me`, which detours
 through an intermediate landing page first. Use the WhatsApp tab already
 opened in workflow step 2.
 
