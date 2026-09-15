@@ -46,11 +46,10 @@ with the user before sending any WhatsApp message — just send it.
    Uber flow (step 3), one for WhatsApp. Keep both tab IDs around for the
    rest of this run. Note: WhatsApp Web reloads its full splash screen
    (~3s) on *every* navigation to a `send?phone=...` URL, even within the
-   same tab in the same run — there's no "warm session" shortcut here
-   (tested 2026-09-15: a second send in the same tab was just as slow as
-   the first). Don't bother pre-loading a bare `web.whatsapp.com` for this
-   reason; just open an empty tab and navigate it fresh each time you
-   actually need to send (step 8/9).
+   same tab in the same run — there's no "warm session" shortcut here.
+   Don't bother pre-loading a bare `web.whatsapp.com` for this reason;
+   just open an empty tab and navigate it fresh each time you actually
+   need to send (step 8/9).
 3. In the Uber tab, navigate straight to this pre-filled deep link — it
    encodes pickup, dropoff, and vehicle choice, and lands directly on the
    fare screen (skips manual address entry/autocomplete):
@@ -126,8 +125,7 @@ with the user before sending any WhatsApp message — just send it.
    run the rest of this workflow autonomously — no further check-ins with
    the user (see Autonomy boundary above).
 7. **Confirm the URL actually changed before doing anything else.** A
-   successful request navigates the tab through two distinct routes
-   (verified 2026-09-15, both from a real request):
+   successful request navigates the tab through two distinct routes:
    - `m.uber.com/go/dispatching?...&trip_uuid=<uuid>&...` first — still
      searching for a driver, none assigned yet. Same query params as the
      product-selection deep link, plus `trip_uuid`.
@@ -143,8 +141,7 @@ with the user before sending any WhatsApp message — just send it.
 8. Take a screenshot. If the URL is `/go/dispatching`, still searching for
    a driver — `wait` a few seconds and screenshot again (don't send any
    WhatsApp message yet, nothing to report). Once the URL becomes
-   `/go/on-trip`, a driver is assigned and the page shows (verified
-   2026-09-15):
+   `/go/on-trip`, a driver is assigned and the page shows:
    - Header: `"Pickup in <N> mins"`
    - Driver card: photo, star rating, name, plate, vehicle model
    - `Send a message...` / call buttons (not used by this skill)
@@ -167,15 +164,13 @@ with the user before sending any WhatsApp message — just send it.
     screenshot) and send exactly one WhatsApp message per state
     transition — don't repeat a message for a state already notified:
     - ETA drops to a few minutes (≈3 min or less): `"O motorista está a
-      poucos minutos de distância! 🕐"` (verified 2026-09-15 against a
-      real trip: fired correctly around "Pickup in 2 mins")
+      poucos minutos de distância! 🕐"`
     - Driver is arriving/very close (≈1 min or "arriving now" shown):
-      `"O motorista está chegando, já tá bem pertinho! 📍"` (verified
-      2026-09-15 at "Pickup in 1 min")
+      `"O motorista está chegando, já tá bem pertinho! 📍"`
     - **The driver cancels mid-trip** (a cancellation notice appears on
       the `/go/on-trip` page itself, and Uber auto-searches for a
-      replacement without leaving that page/trip — not yet observed
-      live, inferred from normal Uber behavior): send `"Opa, o motorista
+      replacement without leaving that page/trip — inferred from normal
+      Uber behavior, not directly observed): send `"Opa, o motorista
       cancelou a corrida. Já estou chamando outro pra você, só um
       instante! 🔄"`, then go back to step 8 (wait for the new
       assignment) and use this message instead of the step 9 one once
@@ -190,9 +185,9 @@ with the user before sending any WhatsApp message — just send it.
       **This is distinct from the user cancelling the ride themselves**
       (clicking `Cancel ride`, which this skill never does) — that
       returns the tab to `/go/product-selection`, a dead end with no
-      auto-rebooking (verified 2026-09-15: cancelling manually just
-      dumps you back at the full ride list, exactly like a fresh session).
-      If you land back on `/go/product-selection` after having been on
+      auto-rebooking (cancelling manually just dumps you back at the full
+      ride list, exactly like a fresh session). If you land back on
+      `/go/product-selection` after having been on
       `/go/on-trip`, treat it as the trip having ended/been cancelled —
       report that to the user, don't try to auto-rebook.
     - Trip completes (driver arrived / ride ends): stop polling.
@@ -201,18 +196,16 @@ with the user before sending any WhatsApp message — just send it.
 
 ## Sending a WhatsApp message
 
-Verified working end-to-end 2026-09-15 against a real trip (driver
-assigned + approaching + arriving messages all sent and delivered). Use
-`web.whatsapp.com`'s `send` URL directly — not `wa.me`, which detours
+Use `web.whatsapp.com`'s `send` URL directly — not `wa.me`, which detours
 through an intermediate landing page first. Use the WhatsApp tab already
 opened in workflow step 2.
 
 1. In the WhatsApp tab, navigate to:
    `https://web.whatsapp.com/send?phone=5511989327233&text=<url-encoded message>`
 2. This always shows a ~3s loading splash screen, even on repeat sends in
-   the same tab/run (there's no warm-session shortcut — verified). `wait`
-   ~3s, then screenshot. The chat should load with the message pre-filled
-   in the input box.
+   the same tab/run — there's no warm-session shortcut. `wait` ~3s, then
+   screenshot. The chat should load with the message pre-filled in the
+   input box.
 3. Find and click the send button (green paper-plane icon, bottom-right of
    the input box) using the screenshot coordinates — this actually sends
    the message. Per the Autonomy boundary above, do this without asking
