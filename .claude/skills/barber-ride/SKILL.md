@@ -40,9 +40,25 @@ Route: **The One Office Tower** (pickup) → **Condomínio Brisas da Mata**
 3. Confirm we're logged in (the account avatar top-right shows a name, not
    a "Log in" prompt). If not logged in, stop and tell the user — don't
    attempt to log in on their behalf.
-4. Read the fare shown next to the selected ride type and **show it to the
-   user, asking for explicit confirmation before requesting** — this is a
-   real purchase, never request without a yes.
+4. Read the fare shown next to the selected ride type (e.g. "R$17.97").
+   Run `scripts/render_fare.py <digits>` (e.g. `render_fare.py 17.97`) to
+   get the ASCII digit block, then show the confirmation message in this
+   exact format and **ask for explicit confirmation before requesting** —
+   this is a real purchase, never request without a yes:
+
+   ```
+   BARBER RIDE 🪒
+
+   The One Office Tower
+      → Condomínio Brisas da Mata
+
+   R$
+   <output of render_fare.py>
+
+   UberX · <ETA> · <payment method>
+
+   Confirm & Request?
+   ```
 5. Only after the user confirms: click **Request \<ride_type\>** to book
    the ride.
 6. Poll the post-request screen for driver assignment (name, vehicle,
