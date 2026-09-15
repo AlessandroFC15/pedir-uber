@@ -23,8 +23,7 @@ Route: **The One Office Tower** (pickup) → **Condomínio Brisas da Mata**
 ## Workflow
 
 1. Load the browser tools (`ToolSearch` for `mcp__claude-in-chrome__*`,
-   including `get_page_text` and `read_page`, if not already loaded) and
-   open a tab.
+   including `get_page_text`, if not already loaded) and open a tab.
 2. Navigate straight to this pre-filled deep link — it encodes pickup,
    dropoff, and vehicle choice, and lands directly on the fare screen
    (skips manual address entry/autocomplete):
@@ -38,20 +37,22 @@ Route: **The One Office Tower** (pickup) → **Condomínio Brisas da Mata**
    type "The One Office Tower", select the suggestion, repeat for
    "Condomínio Brisas da Mata" as dropoff, click **Search**, then select
    **UberX** from the list.
-3. Confirm we're logged in and read the fare using `get_page_text` or
-   `read_page` — not a screenshot. Screenshots require visually eyeballing
-   the page, which is unreliable for reading exact numbers; the account
-   name (top-right) and the fare/ETA/payment text are all real page text,
-   so extract them directly. If the account name isn't present, stop and
-   tell the user — don't attempt to log in on their behalf.
-4. Run `scripts/render_fare.py <digits>` (e.g. `render_fare.py 17.97`)
-   silently to get the ASCII digit block — don't narrate this step or
-   announce "let me render the fare display" first. The confirmation
-   message below is the entire response to the user for this turn: no
-   preceding "landed on the fare screen, let me..." commentary, no
-   separate message before or after it. One message, this exact format,
-   ending by **asking for explicit confirmation before requesting** — this
-   is a real purchase, never request without a yes:
+3. Confirm we're logged in and read the fare using `get_page_text` —
+   not a screenshot, and not `read_page` (its full accessibility tree is
+   much heavier and noticeably slower; `get_page_text` is the lightest
+   option and speed matters here). The account name (top-right) and the
+   fare/ETA/payment text are all real page text, so extract them directly
+   rather than eyeballing a screenshot. If the account name isn't present,
+   stop and tell the user — don't attempt to log in on their behalf.
+4. Build the ASCII digit block **directly in your response text, using the
+   glyph table below** — do not run `render_fare.py` or any other tool
+   call for this. A tool call renders as a visible block in the transcript
+   and breaks the reveal; this is plain string assembly you can do
+   yourself. The confirmation message is the entire response to the user
+   for this turn: no preceding "landed on the fare screen, let me..."
+   commentary, no separate message before or after it. One message, this
+   exact format, ending by **asking for explicit confirmation before
+   requesting** — this is a real purchase, never request without a yes:
 
    ```
    BARBER RIDE 🪒
@@ -60,12 +61,37 @@ Route: **The One Office Tower** (pickup) → **Condomínio Brisas da Mata**
       → Condomínio Brisas da Mata
 
    R$
-   <output of render_fare.py>
+   <ASCII digit block>
 
    UberX · <ETA> · <payment method>
 
    Confirm & Request?
    ```
+
+   To build `<ASCII digit block>` for a fare like "17.97": take each
+   character's 5-row glyph from the table, replace every space with `░`,
+   join the glyphs for each row with a single `░` separator, then wrap the
+   whole thing in a 1-character `░` border (a full `░` row above and
+   below, one `░` column on each side of every row). `render_fare.py` in
+   `scripts/` implements this exact algorithm — read it if you want to
+   verify your output, or as a fallback if hand-assembly proves unreliable
+   in practice, but don't invoke it as a live tool call.
+
+   Digit glyphs (each row is exactly 5 characters — copy verbatim):
+   ```
+   0: ' ███ ' '█   █' '█   █' '█   █' ' ███ '
+   1: '  █  ' ' ██  ' '  █  ' '  █  ' ' ███ '
+   2: ' ███ ' '█   █' '   █ ' '  █  ' '█████'
+   3: ' ███ ' '█   █' '  ██ ' '█   █' ' ███ '
+   4: '█   █' '█   █' '█████' '    █' '    █'
+   5: '█████' '█    ' '████ ' '    █' '████ '
+   6: ' ███ ' '█    ' '████ ' '█   █' ' ███ '
+   7: '█████' '    █' '   █ ' '  █  ' '  █  '
+   8: ' ███ ' '█   █' ' ███ ' '█   █' ' ███ '
+   9: ' ███ ' '█   █' ' ████' '    █' ' ███ '
+   .: '     ' '     ' '     ' '     ' '  █  '
+   ```
+   Each digit's 5 quoted strings are its rows top to bottom.
 5. Only after the user confirms: click **Request \<ride_type\>** to book
    the ride.
 6. Poll the post-request screen for driver assignment (name, vehicle,
