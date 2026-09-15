@@ -22,8 +22,9 @@ Route: **The One Office Tower** (pickup) → **Condomínio Brisas da Mata**
 
 ## Workflow
 
-1. Load the browser tools (`ToolSearch` for `mcp__claude-in-chrome__*` if
-   not already loaded) and open a tab.
+1. Load the browser tools (`ToolSearch` for `mcp__claude-in-chrome__*`,
+   including `get_page_text` and `read_page`, if not already loaded) and
+   open a tab.
 2. Navigate straight to this pre-filled deep link — it encodes pickup,
    dropoff, and vehicle choice, and lands directly on the fare screen
    (skips manual address entry/autocomplete):
@@ -37,14 +38,20 @@ Route: **The One Office Tower** (pickup) → **Condomínio Brisas da Mata**
    type "The One Office Tower", select the suggestion, repeat for
    "Condomínio Brisas da Mata" as dropoff, click **Search**, then select
    **UberX** from the list.
-3. Confirm we're logged in (the account avatar top-right shows a name, not
-   a "Log in" prompt). If not logged in, stop and tell the user — don't
-   attempt to log in on their behalf.
-4. Read the fare shown next to the selected ride type (e.g. "R$17.97").
-   Run `scripts/render_fare.py <digits>` (e.g. `render_fare.py 17.97`) to
-   get the ASCII digit block, then show the confirmation message in this
-   exact format and **ask for explicit confirmation before requesting** —
-   this is a real purchase, never request without a yes:
+3. Confirm we're logged in and read the fare using `get_page_text` or
+   `read_page` — not a screenshot. Screenshots require visually eyeballing
+   the page, which is unreliable for reading exact numbers; the account
+   name (top-right) and the fare/ETA/payment text are all real page text,
+   so extract them directly. If the account name isn't present, stop and
+   tell the user — don't attempt to log in on their behalf.
+4. Run `scripts/render_fare.py <digits>` (e.g. `render_fare.py 17.97`)
+   silently to get the ASCII digit block — don't narrate this step or
+   announce "let me render the fare display" first. The confirmation
+   message below is the entire response to the user for this turn: no
+   preceding "landed on the fare screen, let me..." commentary, no
+   separate message before or after it. One message, this exact format,
+   ending by **asking for explicit confirmation before requesting** — this
+   is a real purchase, never request without a yes:
 
    ```
    BARBER RIDE 🪒
