@@ -22,8 +22,10 @@ Route: **The One Office Tower** (pickup) → **Condomínio Brisas da Mata**
 
 ## Workflow
 
-1. Load the browser tools (`ToolSearch` for `mcp__claude-in-chrome__*`,
-   including `get_page_text`, if not already loaded) and open a tab.
+1. Load the browser tools (`ToolSearch` for `mcp__claude-in-chrome__*` if
+   not already loaded) and open a tab. Use screenshots for everything —
+   reading state and clicking. Take one screenshot per step, act on it
+   immediately, don't loop back for extra confirmation screenshots.
 2. Navigate straight to this pre-filled deep link — it encodes pickup,
    dropoff, and vehicle choice, and lands directly on the fare screen
    (skips manual address entry/autocomplete):
@@ -37,13 +39,12 @@ Route: **The One Office Tower** (pickup) → **Condomínio Brisas da Mata**
    type "The One Office Tower", select the suggestion, repeat for
    "Condomínio Brisas da Mata" as dropoff, click **Search**, then select
    **UberX** from the list.
-3. Confirm we're logged in and read the fare using `get_page_text` —
-   not a screenshot, and not `read_page` (its full accessibility tree is
-   much heavier and noticeably slower; `get_page_text` is the lightest
-   option and speed matters here). The account name (top-right) and the
-   fare/ETA/payment text are all real page text, so extract them directly
-   rather than eyeballing a screenshot. If the account name isn't present,
-   stop and tell the user — don't attempt to log in on their behalf.
+3. Take a screenshot immediately — don't insert a `wait` action first.
+   Confirm we're logged in (account avatar/name top-right, not a "Log in"
+   prompt) and read the fare, ETA, and payment method for the selected
+   ride type off it. If not logged in, stop and tell the user — don't
+   attempt to log in on their behalf. Only use `wait` if the screenshot
+   actually shows a loading skeleton/spinner — never as a precaution.
 4. Build the ASCII digit block **directly in your response text, using the
    glyph table below** — do not run `render_fare.py` or any other tool
    call for this. A tool call renders as a visible block in the transcript
@@ -92,10 +93,12 @@ Route: **The One Office Tower** (pickup) → **Condomínio Brisas da Mata**
    .: '     ' '     ' '     ' '     ' '  █  '
    ```
    Each digit's 5 quoted strings are its rows top to bottom.
-5. Only after the user confirms: click **Request \<ride_type\>** to book
-   the ride.
-6. Poll the post-request screen for driver assignment (name, vehicle,
-   plate, ETA).
+5. Only after the user confirms: click **Request \<ride_type\>** using the
+   coordinates from the screenshot already taken in step 3 — don't take a
+   fresh screenshot just to click a button whose position you already
+   know, unless the page has visibly changed since.
+6. Take a screenshot of the post-request screen and read driver
+   assignment (name, vehicle, plate, ETA) off it.
 7. Once a driver is assigned, send the barber the trip details (channel
    TBD — milestone 6).
 8. Report completion status back to the user.
