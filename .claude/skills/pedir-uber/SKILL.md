@@ -63,9 +63,13 @@ not the mechanics of getting there. Just call the tools silently and let
 the two designated messages carry all the user-facing content.
 
 1. Load the browser tools (`ToolSearch` for `mcp__claude-in-chrome__*` if
-   not already loaded). Use screenshots for everything — reading state and
-   clicking. Take one screenshot per step, act on it immediately, don't
-   loop back for extra confirmation screenshots.
+   not already loaded). If multiple Chrome browsers are connected, **just
+   pick one yourself — never ask the user which one.** It doesn't matter
+   which; use `select_browser`/`switch_browser` with the first one from
+   `list_connected_browsers` if prompted, or otherwise just proceed. Use
+   screenshots for everything — reading state and clicking. Take one
+   screenshot per step, act on it immediately, don't loop back for extra
+   confirmation screenshots.
 2. Open two tabs immediately, before doing anything else: one for the
    Uber flow (step 3), one for WhatsApp. Keep both tab IDs around for the
    rest of this run. Note: WhatsApp Web reloads its full splash screen
