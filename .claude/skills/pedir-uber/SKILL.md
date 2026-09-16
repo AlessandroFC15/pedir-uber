@@ -1,9 +1,9 @@
 ---
-name: barber-ride
-description: Get my barber an Uber. Use when the user says "get my barber an Uber", "order my barber's ride", or similar. Drives m.uber.com via browser automation (Claude in Chrome) since the Riders API isn't practically reachable for a personal project. Sends the barber WhatsApp status updates in Brazilian Portuguese, fully autonomously after fare confirmation.
+name: pedir-uber
+description: Chama um Uber pro barbeiro. Use when the user says "chama um Uber pro meu barbeiro", "pede um Uber pro meu barbeiro", "manda um Uber pro barbeiro", or the English equivalents ("get my barber an Uber", "order my barber's ride"). Drives m.uber.com via browser automation (Claude in Chrome) since the Riders API isn't practically reachable for a personal project. Sends the barber WhatsApp status updates in Brazilian Portuguese, fully autonomously after fare confirmation.
 ---
 
-# Barber Ride
+# Pedir Uber (Barber Ride)
 
 ## Current status
 
@@ -20,8 +20,20 @@ logged into the browser.
 Route: **The One Office Tower** (pickup) → **Condomínio Brisas da Mata**
 (dropoff), Jundiaí/SP, ride type **UberX**.
 
-Barber's WhatsApp number (test value — actually the user's own number for
-now): **+55 11 98932-7233** → digits-only for the send URL: `5511989327233`.
+**Mode — real vs. test:** default to **real mode**, sending to the
+barber's actual number: **+55 11 95913-3091** → digits-only for the send
+URL: `REDACTED_PHONE_NUMBER`. Switch to **test mode** (send to the user's own
+number instead: +55 11 98932-7233 → `5511989327233`) only when the user
+explicitly says so in their request for this run (e.g. "test mode",
+"modo teste", "em modo de teste") — never infer test mode from context,
+and don't ask which mode each time; the absence of that phrase means
+real mode. Test-mode messages are worded identically to real ones — no
+`[TESTE]` prefix or other marker, so the run is a faithful rehearsal of
+the real flow. This choice only affects which WhatsApp number all sends
+in this run target — every other step (fare confirmation, the actual
+Uber booking, the autonomy boundary) is identical in both modes: a test
+run still books and pays for a real ride, since there's no way to
+rehearse the WhatsApp piece meaningfully without a real trip to report on.
 
 **Language: everything is in Brazilian Portuguese** — both what's shown to
 the user in this chat (the fare confirmation card, status updates) and
@@ -221,7 +233,8 @@ through an intermediate landing page first. Use the WhatsApp tab already
 opened in workflow step 2.
 
 1. In the WhatsApp tab, navigate to:
-   `https://web.whatsapp.com/send?phone=5511989327233&text=<url-encoded message>`
+   `https://web.whatsapp.com/send?phone=<selected number per Mode above>&text=<url-encoded message>`
+   — `REDACTED_PHONE_NUMBER` in real mode (default), `5511989327233` in test mode.
 2. This always shows a ~3s loading splash screen, even on repeat sends in
    the same tab/run — there's no warm-session shortcut. `wait` ~3s, then
    screenshot. The chat should load with the message pre-filled in the

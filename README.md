@@ -9,5 +9,8 @@ Uber API decision, V1 scope, LinkedIn angle).
 
 ## Status
 
-Planning. Uber Riders API access and the "requesting for someone else"
-policy question still need validating before building anything.
+Working end-to-end: request the ride, track the driver, notify the
+barber via WhatsApp (including the trip start PIN), all autonomously
+after one fare confirmation. Skill lives at `.claude/skills/pedir-uber/`.
+See [MILESTONES.md](MILESTONES.md) for what's been validated so far.
+Milestone 7 (a real Wednesday dry run + LinkedIn content) is next.

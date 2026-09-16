@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Render a fare value (e.g. "17.97") as a shaded blocky ASCII digit
-display, for the fare-confirmation step of the barber-ride skill.
+display, for the fare-confirmation step of the pedir-uber skill.
 
 Usage: render_fare.py 17.97
 """
