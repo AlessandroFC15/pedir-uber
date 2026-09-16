@@ -19,6 +19,13 @@ description: Chama um Uber para uma pessoa (pelo nome ou apelido). Use when the 
   autonomously — no further check-ins, including every WhatsApp send.
   Fare confirmation is the *only* gate, since it's the only step that
   spends money.
+- **After any `zoom`/`screenshot` call with `save_to_disk: true`: the
+  tool result IS the attachment. Full stop.** Never run `ls`, `find`,
+  `cat`, `open`, `file`, or any other command against the saved path
+  afterward — not to verify it exists, not to inspect it, not for any
+  reason. The saved path in the tool result is inert metadata for your
+  own reference only. Go directly from the tool call to writing the
+  message that uses it.
 - Never click **Cancel ride** or ask which Chrome browser to use — pick
   silently if prompted.
 
@@ -79,8 +86,8 @@ Nothing else differs: a test run still books and pays for a real ride.
    (avatar top-right, not "Log in") — if not, stop and tell the user.
 6. From that screenshot, `zoom` into the selected ride card's bounding
    box with `save_to_disk: true` — crops out the map/sidebar, leaving
-   just fare/ETA/discount. The zoom result *is* the attachment; don't
-   `ls`/`find`/`cat` the saved file afterward. Compose one message (no
+   just fare/ETA/discount (see the file-inspection Rule above — go
+   straight from this call to the message). Compose one message (no
    preceding commentary) in this format, image attached:
 
    ```
