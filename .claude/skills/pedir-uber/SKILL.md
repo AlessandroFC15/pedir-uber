@@ -51,11 +51,12 @@ with the user before sending any WhatsApp message — just send it.
 ## Workflow
 
 **Silence rule: this whole workflow sends exactly two chat messages to
-the user — the step 5 confirmation card, and the step 11 final report.**
-(One narrow exception: if the PIN genuinely can't be found per step 9,
-that's worth its own short message — a human needs to know before the
-driver arrives.) Otherwise, no narration before, between, or after
-tool calls — not
+the user — the step 5 confirmation card, and the step 11 final report**
+(the `AskUserQuestion` confirmation that follows step 5's card is a
+clickable prompt, not a separate narrated message). One narrow exception:
+if the PIN genuinely can't be found per step 9, that's worth its own
+short message — a human needs to know before the driver arrives.
+Otherwise, no narration before, between, or after tool calls — not
 "vou abrir as abas", not "agora tenho duas abas", not "logado, vou tirar
 outra screenshot", nothing describing tabs, navigation, clicks, or
 intermediate page states. The user cares about the fare and the outcome,
@@ -101,13 +102,17 @@ the two designated messages carry all the user-facing content.
    the deep link's `vehicle` param) and `zoom` into just that region with
    `save_to_disk: true`. This crops out the map, sidebar, and every other
    ride option, leaving just the card with fare, ETA, and any discount —
-   no ASCII art needed, the real Uber UI is the confirmation visual. The
-   confirmation message is the entire response to the user for this turn:
-   no preceding "landed on the fare screen, let me..." commentary, no
-   separate message before or after it. One message, in Brazilian
-   Portuguese, this exact format (with the cropped image attached), ending
-   by **asking for explicit confirmation before requesting** — this is a
-   real purchase, never request without a yes:
+   no ASCII art needed, the real Uber UI is the confirmation visual. **The
+   zoom tool result is already the attachment — that's it, nothing else.**
+   Don't run `ls`/`find`/`cat`/any command to locate, open, or inspect the
+   saved file afterward; the saved path is just metadata for your own
+   reference, not something to act on. Go straight from the `zoom` call to
+   composing the message below.
+
+   The confirmation message is the entire response to the user for this
+   turn: no preceding "landed on the fare screen, let me..." commentary,
+   no separate message before or after it. One message, in Brazilian
+   Portuguese, this exact format, with the cropped image attached:
 
    ```
    CORRIDA DO BARBEIRO 🪒
@@ -116,13 +121,19 @@ the two designated messages carry all the user-facing content.
       → Condomínio Brisas da Mata
 
    <cropped fare-card screenshot attached here>
-
-   Confirmar e solicitar?
    ```
 
    If the client can't render an attached image (e.g. a plain terminal),
-   fall back to stating the fare/ETA/payment as plain text instead of
-   the image, still as part of this one message.
+   fall back to stating the fare/ETA/payment as plain text in this message
+   instead of the image.
+
+   Then ask for **explicit confirmation before requesting** — this is a
+   real purchase, never request without a yes — using `AskUserQuestion`
+   with a single question (e.g. "Confirmar e solicitar o UberX?") and two
+   options, **"Confirmar"** and **"Cancelar"**, so the user can click
+   instead of having to type a reply. Don't fold this into the message
+   above as plain text ending in a question mark; use the actual tool so
+   it renders as clickable choices where the client supports it.
 6. Only after the user confirms: click **Request \<ride_type\>** using the
    coordinates from the screenshot already taken in step 4 — don't take a
    fresh screenshot just to click a button whose position you already
