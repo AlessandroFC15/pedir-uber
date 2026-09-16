@@ -152,11 +152,15 @@ Nothing else differs: a test run still books and pays for a real ride.
 
 Triggered from step 1 when no match is found.
 
-1. Ask for the four fields **one at a time, each its own short Portuguese
-   chat message** — not `AskUserQuestion` (free-text, not a pick from
-   options) and not bundled into one message listing all four. Wait for
-   each reply before asking the next: nome completo → telefone (com
-   código do país) → endereço de partida → endereço de destino.
+1. **Only ask for what's actually missing.** The original request often
+   already gives some of this — e.g. "pra minha sogra, Dona Jaque" gives
+   the name ("Dona Jaque") and an alias ("minha sogra") right there;
+   don't re-ask for a name you were just told. For whatever's genuinely
+   still needed among nome completo, telefone (com código do país),
+   endereço de partida, endereço de destino — ask **one at a time, each
+   its own short Portuguese chat message**, not `AskUserQuestion`
+   (free-text, not a pick from options) and not bundled into one message
+   listing several fields. Wait for each reply before asking the next.
 2. Open a Uber tab, go to `m.uber.com`, resolve the route via the manual
    flow (type + pick suggestions for pickup and dropoff, Search, select
    UberX).
