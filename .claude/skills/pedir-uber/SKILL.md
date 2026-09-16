@@ -12,8 +12,9 @@ description: Chama um Uber para uma pessoa (pelo nome ou apelido). Use when the 
   `AskUserQuestion` text, errors, and decline messages.
 - **Exactly two chat messages per run**: the fare confirmation card
   (step 6) and the final report (step 12). No narration around tool
-  calls, tabs, or navigation. New-contact registration questions are the
-  one exception (inherent to that one-time setup).
+  calls, tabs, or navigation. New-contact registration is the exception —
+  its one-at-a-time questions and address confirmation are inherent to
+  that one-time setup, not narration.
 - **Autonomy**: after the fare is confirmed (step 6), run fully
   autonomously — no further check-ins, including every WhatsApp send.
   Fare confirmation is the *only* gate, since it's the only step that
@@ -151,9 +152,11 @@ Nothing else differs: a test run still books and pays for a real ride.
 
 Triggered from step 1 when no match is found.
 
-1. Ask (one Portuguese chat message, plain text — not `AskUserQuestion`,
-   this is free-text info): nome completo, telefone (com código do
-   país), endereço de partida, endereço de destino.
+1. Ask for the four fields **one at a time, each its own short Portuguese
+   chat message** — not `AskUserQuestion` (free-text, not a pick from
+   options) and not bundled into one message listing all four. Wait for
+   each reply before asking the next: nome completo → telefone (com
+   código do país) → endereço de partida → endereço de destino.
 2. Open a Uber tab, go to `m.uber.com`, resolve the route via the manual
    flow (type + pick suggestions for pickup and dropoff, Search, select
    UberX).
