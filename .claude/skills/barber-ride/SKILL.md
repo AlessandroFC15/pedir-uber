@@ -147,11 +147,22 @@ with the user before sending any WhatsApp message — just send it.
    - `Send a message...` / call buttons (not used by this skill)
    - Pickup/dropoff addresses with `Change` links
    - Fare and payment method
+   - A **security/start PIN** — the code the barber gives the driver to
+     start the trip. This is critical: without it the driver can't start
+     the ride. Its exact position on the page hasn't been mapped yet, so
+     actively scan the whole screenshot for it (a short numeric code,
+     often labeled "PIN" or similar, sometimes near the driver card,
+     sometimes only shown once you scroll/expand trip details) — don't
+     assume it's absent just because it's not in the fold. If a screenshot
+     genuinely doesn't show one, take one more screenshot after scrolling
+     the panel before concluding there isn't one this trip.
    - A `Cancel ride` button — **never click this**; it's for the human
      user only, not something this skill triggers itself.
 9. As soon as a driver is assigned, send the barber a WhatsApp message
-   with the trip details, using the WhatsApp tab already opened in step 2
-   (see "Sending a WhatsApp message" below):
+   with the trip details **including the PIN** — this is the single most
+   important piece of information in this message, since the driver can't
+   start the trip without it — using the WhatsApp tab already opened in
+   step 2 (see "Sending a WhatsApp message" below):
 
    ```
    Oi! Chamei um Uber pra você 🚗
@@ -159,7 +170,13 @@ with the user before sending any WhatsApp message — just send it.
    Motorista: <name>
    Veículo: <vehicle> (placa <plate>)
    Chegada: <ETA>
+   PIN de início: <pin>
    ```
+
+   If the PIN genuinely isn't visible anywhere on the page after the
+   extra scroll/screenshot in step 8, still send this message without a
+   PIN line, but flag it to the user in this chat (not to the barber) so
+   a human can check the Uber app for it — don't silently omit it.
 10. Keep polling the tracking screen (screenshot every ~30s via `wait` +
     screenshot) and send exactly one WhatsApp message per state
     transition — don't repeat a message for a state already notified:
@@ -181,7 +198,10 @@ with the user before sending any WhatsApp message — just send it.
       Motorista: <name>
       Veículo: <vehicle> (placa <plate>)
       Chegada: <ETA>
+      PIN de início: <pin>
       ```
+      The new driver almost certainly has a different PIN — re-read it
+      from the page per step 8, don't reuse the old one.
       **This is distinct from the user cancelling the ride themselves**
       (clicking `Cancel ride`, which this skill never does) — that
       returns the tab to `/go/product-selection`, a dead end with no
