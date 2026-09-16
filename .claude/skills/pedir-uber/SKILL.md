@@ -1,6 +1,6 @@
 ---
 name: pedir-uber
-description: Chama um Uber para uma pessoa (pelo nome ou apelido). Use when the user says "chama um Uber pro <nome>", "pede um Uber pra <nome/apelido>", "manda um Uber pro <pessoa>", or English equivalents ("get an Uber for <name>"). Looks up the person in contatos.json by fuzzy-matching name/apelidos; registers them if not found. Drives m.uber.com via browser automation (Claude in Chrome) since the Riders API isn't practically reachable for a personal project. Sends WhatsApp status updates in Brazilian Portuguese, fully autonomously after fare confirmation.
+description: Chama um Uber para uma pessoa (pelo nome ou apelido). Use when the user says "chama um Uber pro <nome>", "pede um Uber pra <nome/apelido>", "manda um Uber pro <pessoa>", or English equivalents ("get an Uber for <name>"). Add a --test flag (e.g. "/pedir-uber Elian --test") to send WhatsApp updates to the user's own number instead of the contact's. Looks up the person in contatos.json by fuzzy-matching name/apelidos; registers them if not found. Drives m.uber.com via browser automation (Claude in Chrome) since the Riders API isn't practically reachable for a personal project. Sends WhatsApp status updates in Brazilian Portuguese, fully autonomously after fare confirmation.
 ---
 
 # Pedir Uber
@@ -47,17 +47,21 @@ skips manual address autocomplete on repeat requests. Ride type is fixed
 at **UberX** for everyone (V1 scope).
 
 **Mode**: real (default) sends to the contact's own `telefone`. Test mode
-— triggered only by an explicit phrase like "modo teste" in the request,
-never inferred — sends to the global test number `5511989327233` instead.
+sends to the global test number `5511989327233` instead — triggered by a
+`--test` flag as the first argument, immediately after the person's
+name/alias (e.g. `/pedir-uber Elian --test`, `/pedir-uber --test
+barbeiro`, or the natural-language equivalent "modo teste" spoken
+explicitly). Never infer test mode from anything else in the request.
 Nothing else differs: a test run still books and pays for a real ride.
 
 ## Workflow
 
-1. **Identify the person.** Fuzzy-match the name/alias from the request
-   against every contact's `nome`/`apelidos` in `contatos.json`.
-   Confident match → step 2. Multiple plausible matches → ask which one
-   via `AskUserQuestion`. No match → run "Registering a new contact"
-   below, then continue to step 2.
+1. **Identify the person and mode.** Strip a leading/trailing `--test`
+   flag from the request first (see Mode above) — whatever's left is the
+   name/alias to match. Fuzzy-match it against every contact's
+   `nome`/`apelidos` in `contatos.json`. Confident match → step 2.
+   Multiple plausible matches → ask which one via `AskUserQuestion`. No
+   match → run "Registering a new contact" below, then continue to step 2.
 2. Load browser tools (`ToolSearch` for `mcp__claude-in-chrome__*`).
    Screenshots for everything — reading state and clicking.
 3. Open two tabs up front: Uber (step 4) and WhatsApp. WhatsApp Web
