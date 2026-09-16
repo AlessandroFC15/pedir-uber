@@ -129,11 +129,19 @@ the two designated messages carry all the user-facing content.
 
    Then ask for **explicit confirmation before requesting** — this is a
    real purchase, never request without a yes — using `AskUserQuestion`
-   with a single question (e.g. "Confirmar e solicitar o UberX?") and two
-   options, **"Confirmar"** and **"Cancelar"**, so the user can click
-   instead of having to type a reply. Don't fold this into the message
-   above as plain text ending in a question mark; use the actual tool so
-   it renders as clickable choices where the client supports it.
+   with a single question and two options, so the user can click instead
+   of having to type a reply. **Every string passed to `AskUserQuestion`
+   — the question text, both option labels, and both option descriptions
+   — must be in Brazilian Portuguese, same as everywhere else in this
+   skill; the tool's own field names/schema are English, but nothing you
+   write into it should be.** Example:
+   - question: `"Confirmar e solicitar o UberX?"`
+   - header: `"Confirmação"`
+   - option 1: label `"Confirmar"`, description `"Solicita a corrida agora."`
+   - option 2: label `"Cancelar"`, description `"Não solicita a corrida."`
+   Don't fold this into the message above as plain text ending in a
+   question mark; use the actual tool so it renders as clickable choices
+   where the client supports it.
 6. Only after the user confirms: click **Request \<ride_type\>** using the
    coordinates from the screenshot already taken in step 4 — don't take a
    fresh screenshot just to click a button whose position you already
