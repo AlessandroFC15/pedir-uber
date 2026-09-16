@@ -35,9 +35,13 @@ Uber booking, the autonomy boundary) is identical in both modes: a test
 run still books and pays for a real ride, since there's no way to
 rehearse the WhatsApp piece meaningfully without a real trip to report on.
 
-**Language: everything is in Brazilian Portuguese** — both what's shown to
-the user in this chat (the fare confirmation card, status updates) and
-every WhatsApp message sent to the barber.
+**Language: everything is in Brazilian Portuguese, no exceptions.** Every
+message shown to the user in this chat — the fare confirmation card, the
+`AskUserQuestion` confirmation, the final report, a decline/cancellation
+message, a missing-PIN flag, an error, anything at all — and every
+WhatsApp message sent to the barber. If you catch yourself about to write
+an English sentence anywhere in this skill's output, stop and translate
+it before sending.
 
 **Autonomy boundary:** the user has explicitly and durably authorized this
 skill to send WhatsApp messages to the barber automatically, with no
@@ -142,6 +146,13 @@ the two designated messages carry all the user-facing content.
    Don't fold this into the message above as plain text ending in a
    question mark; use the actual tool so it renders as clickable choices
    where the client supports it.
+
+   **If the user picks "Cancelar" (or otherwise declines/dismisses this
+   prompt):** send one short closing message, in Brazilian Portuguese,
+   confirming the ride was *not* requested — e.g. `"Sem problemas, não
+   solicitei a corrida."` — and stop there; don't click Request, don't
+   continue to step 6. This closing message counts as this run's second
+   (final) message, same as step 11 would for a completed run.
 6. Only after the user confirms: click **Request \<ride_type\>** using the
    coordinates from the screenshot already taken in step 4 — don't take a
    fresh screenshot just to click a button whose position you already
