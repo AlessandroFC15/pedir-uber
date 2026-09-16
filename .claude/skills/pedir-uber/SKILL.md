@@ -93,20 +93,21 @@ the two designated messages carry all the user-facing content.
    **UberX** from the list.
 4. Take a screenshot immediately — don't insert a `wait` action first.
    Confirm we're logged in (account avatar/name top-right, not a "Log in"
-   prompt) and read the fare, ETA, and payment method for the selected
-   ride type off it. If not logged in, stop and tell the user — don't
-   attempt to log in on their behalf. Only use `wait` if the screenshot
-   actually shows a loading skeleton/spinner — never as a precaution.
-5. Build the ASCII digit block **directly in your response text, using the
-   glyph table below** — do not use a tool call for this. A tool call
-   renders as a visible block in the transcript and breaks the reveal;
-   this is plain string assembly you can do yourself. The confirmation
-   message is the entire response to the user
-   for this turn: no preceding "landed on the fare screen, let me..."
-   commentary, no separate message before or after it. One message, in
-   Brazilian Portuguese, this exact format, ending by **asking for
-   explicit confirmation before requesting** — this is a real purchase,
-   never request without a yes:
+   prompt). If not logged in, stop and tell the user — don't attempt to
+   log in on their behalf. Only use `wait` if the screenshot actually
+   shows a loading skeleton/spinner — never as a precaution.
+5. From that same screenshot, visually identify the bounding box of the
+   selected ride type's card (the one with a border/highlight — UberX per
+   the deep link's `vehicle` param) and `zoom` into just that region with
+   `save_to_disk: true`. This crops out the map, sidebar, and every other
+   ride option, leaving just the card with fare, ETA, and any discount —
+   no ASCII art needed, the real Uber UI is the confirmation visual. The
+   confirmation message is the entire response to the user for this turn:
+   no preceding "landed on the fare screen, let me..." commentary, no
+   separate message before or after it. One message, in Brazilian
+   Portuguese, this exact format (with the cropped image attached), ending
+   by **asking for explicit confirmation before requesting** — this is a
+   real purchase, never request without a yes:
 
    ```
    CORRIDA DO BARBEIRO 🪒
@@ -114,35 +115,14 @@ the two designated messages carry all the user-facing content.
    The One Office Tower
       → Condomínio Brisas da Mata
 
-   R$
-   <ASCII digit block>
-
-   UberX · <ETA> · <forma de pagamento>
+   <cropped fare-card screenshot attached here>
 
    Confirmar e solicitar?
    ```
 
-   To build `<ASCII digit block>` for a fare like "17.97": take each
-   character's 5-row glyph from the table, replace every space with `░`,
-   join the glyphs for each row with a single `░` separator, then wrap the
-   whole thing in a 1-character `░` border (a full `░` row above and
-   below, one `░` column on each side of every row).
-
-   Digit glyphs (each row is exactly 5 characters — copy verbatim):
-   ```
-   0: ' ███ ' '█   █' '█   █' '█   █' ' ███ '
-   1: '  █  ' ' ██  ' '  █  ' '  █  ' ' ███ '
-   2: ' ███ ' '█   █' '   █ ' '  █  ' '█████'
-   3: ' ███ ' '█   █' '  ██ ' '█   █' ' ███ '
-   4: '█   █' '█   █' '█████' '    █' '    █'
-   5: '█████' '█    ' '████ ' '    █' '████ '
-   6: ' ███ ' '█    ' '████ ' '█   █' ' ███ '
-   7: '█████' '    █' '   █ ' '  █  ' '  █  '
-   8: ' ███ ' '█   █' ' ███ ' '█   █' ' ███ '
-   9: ' ███ ' '█   █' ' ████' '    █' ' ███ '
-   .: '     ' '     ' '     ' '     ' '  █  '
-   ```
-   Each digit's 5 quoted strings are its rows top to bottom.
+   If the client can't render an attached image (e.g. a plain terminal),
+   fall back to stating the fare/ETA/payment as plain text instead of
+   the image, still as part of this one message.
 6. Only after the user confirms: click **Request \<ride_type\>** using the
    coordinates from the screenshot already taken in step 4 — don't take a
    fresh screenshot just to click a button whose position you already
