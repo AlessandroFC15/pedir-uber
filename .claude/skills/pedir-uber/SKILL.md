@@ -50,6 +50,18 @@ with the user before sending any WhatsApp message — just send it.
 
 ## Workflow
 
+**Silence rule: this whole workflow sends exactly two chat messages to
+the user — the step 5 confirmation card, and the step 11 final report.**
+(One narrow exception: if the PIN genuinely can't be found per step 9,
+that's worth its own short message — a human needs to know before the
+driver arrives.) Otherwise, no narration before, between, or after
+tool calls — not
+"vou abrir as abas", not "agora tenho duas abas", not "logado, vou tirar
+outra screenshot", nothing describing tabs, navigation, clicks, or
+intermediate page states. The user cares about the fare and the outcome,
+not the mechanics of getting there. Just call the tools silently and let
+the two designated messages carry all the user-facing content.
+
 1. Load the browser tools (`ToolSearch` for `mcp__claude-in-chrome__*` if
    not already loaded). Use screenshots for everything — reading state and
    clicking. Take one screenshot per step, act on it immediately, don't
@@ -82,10 +94,10 @@ with the user before sending any WhatsApp message — just send it.
    attempt to log in on their behalf. Only use `wait` if the screenshot
    actually shows a loading skeleton/spinner — never as a precaution.
 5. Build the ASCII digit block **directly in your response text, using the
-   glyph table below** — do not run `render_fare.py` or any other tool
-   call for this. A tool call renders as a visible block in the transcript
-   and breaks the reveal; this is plain string assembly you can do
-   yourself. The confirmation message is the entire response to the user
+   glyph table below** — do not use a tool call for this. A tool call
+   renders as a visible block in the transcript and breaks the reveal;
+   this is plain string assembly you can do yourself. The confirmation
+   message is the entire response to the user
    for this turn: no preceding "landed on the fare screen, let me..."
    commentary, no separate message before or after it. One message, in
    Brazilian Portuguese, this exact format, ending by **asking for
@@ -110,10 +122,7 @@ with the user before sending any WhatsApp message — just send it.
    character's 5-row glyph from the table, replace every space with `░`,
    join the glyphs for each row with a single `░` separator, then wrap the
    whole thing in a 1-character `░` border (a full `░` row above and
-   below, one `░` column on each side of every row). `render_fare.py` in
-   `scripts/` implements this exact algorithm — read it if you want to
-   verify your output, or as a fallback if hand-assembly proves unreliable
-   in practice, but don't invoke it as a live tool call.
+   below, one `░` column on each side of every row).
 
    Digit glyphs (each row is exactly 5 characters — copy verbatim):
    ```
