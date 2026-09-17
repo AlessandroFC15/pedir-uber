@@ -52,7 +52,14 @@ Uber session is already logged into the browser.
 `deep_link_query` is the resolved query string (place IDs, not raw
 address text) from the first time that route was resolved — reusing it
 skips manual address autocomplete on repeat requests. Ride type is fixed
-at **UberX** for everyone (V1 scope).
+at **UberX** for everyone (V1 scope), unless the user explicitly asks
+for a different ride type in that request (e.g. "vamos tentar priority
+dessa vez") — in that case, after landing on the fare screen from the
+deep link, click the requested ride's card instead of leaving the
+deep-link default selected, before zooming/confirming in step 6. This is
+a **per-run override only**: never write the alternate vehicle id back
+into `contatos.json`'s `deep_link_query` — the stored default stays
+UberX for next time.
 
 **Mode**: real (default) sends to the contact's own `telefone`. Test mode
 sends to the global test number `5511989327233` instead — triggered by a
@@ -91,21 +98,20 @@ Nothing else differs: a test run still books and pays for a real ride.
    preceding commentary) in this format, image attached:
 
    ```
-   CORRIDA PARA <nome> 🚗
+   Uber para <nome> 🚗
 
-   <endereco_partida>
-      → <endereco_destino>
+   Origem: <endereco_partida>
+   Destino: <endereco_destino>
 
-   <cropped fare-card screenshot attached here>
+   Preço: <preco>
    ```
 
-   (No image support, e.g. plain terminal → state fare/ETA/payment as
-   text instead.) Then confirm via `AskUserQuestion` — question and both
+   Then confirm via `AskUserQuestion` — question and both
    options/descriptions in Portuguese, e.g. "Confirmar e solicitar o
    UberX?" / **Confirmar** / **Cancelar**. Never fold this into the
    message as typed-reply text.
 
-   If declined: send one short Portuguese closing message (e.g. "Sem
+   If declined: send one short closing message (e.g. "Sem
    problemas, não solicitei a corrida.") and stop — this is the run's
    final message.
 7. Only if confirmed: click **Request \<ride_type\>** using step 5's
@@ -115,14 +121,21 @@ Nothing else differs: a test run still books and pays for a real ride.
    `/go/on-trip?trip_uuid=<uuid>` (driver assigned) — never assume, read
    the tab's actual URL. If still on `/go/product-selection` and a "max
    ongoing trips" dialog appears, the request likely *did* succeed
-   elsewhere — dismiss it and check Activity for the live trip instead of
-   treating it as failure.
+   elsewhere — dismiss it and resolve the live trip **by navigating
+   straight to `m.uber.com/go/trips`**, not by clicking the **Activity**
+   button. Clicking Activity from this dialog can just reopen the same
+   "max ongoing trips" dialog instead of navigating anywhere — don't loop
+   on it; go to `/go/trips` directly and read the URL it redirects to.
 9. Screenshot. `/go/dispatching` → still searching, `wait` and retry, no
    message yet. `/go/on-trip` → driver assigned; the page shows pickup
    ETA, driver card (name/plate/vehicle/rating), fare, and a **start
    PIN** the contact must give the driver. The PIN's exact position isn't
    fixed — scan the whole screenshot (and scroll once more if needed)
-   before concluding it's missing.
+   before concluding it's missing. **The status sidebar can render as an
+   empty white box for 10-20s right after landing on `/go/dispatching` or
+   `/go/on-trip`**, with the map already loaded behind it — that's normal
+   hydration lag, not a failure. Just `wait` and screenshot again rather
+   than treating the blank card as broken state.
 10. Send the WhatsApp message (see below) with trip details **including
     the PIN** — the single most critical field, since the driver can't
     start without it:
@@ -152,8 +165,16 @@ Nothing else differs: a test run still books and pays for a real ride.
       which dead-ends at `/go/product-selection` with no auto-rebook — if
       you land back there after being on `/go/on-trip`, treat the trip as
       over and report it, don't try to rebook.
-    - Trip completes → stop polling.
-12. Report final status to the user, in Portuguese.
+    - **Trip starts → stop polling. This is the run's finish line, not
+      trip completion.** The sidebar flips from the PIN/pickup card to a
+      `Dropoff at <time>` card with no PIN — that means the contact got
+      in the car and gave the driver the PIN. The job is done at that
+      instant: don't keep polling for the drop-off itself, don't wait for
+      the trip to actually end. A confirmed driver plus a passenger in
+      the car is the deliverable, not arrival at the destination.
+12. Report final status to the user, in Portuguese — this is reported as
+    soon as the trip starts (previous bullet), not after the ride
+    actually finishes.
 
 ## Registering a new contact
 
@@ -193,11 +214,12 @@ page) in the tab opened in step 3.
    pre-filled in the input box.
 3. Click the green send button (bottom-right) using screenshot
    coordinates — this actually sends, no confirmation needed (Autonomy).
-4. QR code instead of a chat → not logged in; stop and tell the user,
+4. **Verify the send landed before moving on.** Take one more
+   screenshot: the message should now show as a sent bubble (with a
+   checkmark), not still sitting in the input box. A click can silently
+   miss — e.g. a "message notifications are off" banner appearing right
+   then shifts the layout under the coordinates. If the text is still in
+   the input box, click send again. Don't chain the next action on an
+   unverified send.
+5. QR code instead of a chat → not logged in; stop and tell the user,
    don't log in on their behalf.
-
-## Notes
-
-- V1 scope: one rider per run, UberX only, for every contact.
-- `contatos.json` is the source of truth for registered people —
-  git-tracked alongside this file.
