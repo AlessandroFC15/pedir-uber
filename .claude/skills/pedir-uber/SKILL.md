@@ -89,8 +89,7 @@ Nothing else differs: a test run still books and pays for a real ride.
    If it errors or looks stale, fall back to the manual flow (open
    `m.uber.com`, type pickup/dropoff into the fields, pick suggestions,
    Search, select UberX) and refresh `deep_link_query` in `contatos.json`.
-5. Screenshot immediately (no precautionary `wait`). Confirm logged in
-   (avatar top-right, not "Log in") — if not, stop and tell the user.
+5. Screenshot immediately (no precautionary `wait`).
 6. From that screenshot, `zoom` into the selected ride card's bounding
    box with `save_to_disk: true` — crops out the map/sidebar, leaving
    just fare/ETA/discount (see the file-inspection Rule above — go
