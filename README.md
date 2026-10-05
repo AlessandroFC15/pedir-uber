@@ -1,10 +1,12 @@
 # Pedir Uber
 
+<img width="1096" height="720" alt="rec_Claude" src="https://github.com/user-attachments/assets/ae98dee8-efbe-4e3d-ae6b-2ecf999e1125" />
+
 A Claude Skill that requests an Uber for someone else and notifies them
 automatically once a driver is assigned — replacing the manual
 "request → screenshot → WhatsApp" routine.
 
-Say "chama um Uber pro Elian" (or "/pedir-uber Elian") and Claude drives
+Say "chama um Uber pro meu barbeiro" and Claude drives
 `m.uber.com` in your browser, confirms the fare with you once, then
 handles everything else — tracking the driver, messaging the rider the
 PIN they need to give the driver, and reporting back once the trip
