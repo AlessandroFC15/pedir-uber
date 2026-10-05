@@ -1,6 +1,6 @@
 ---
 name: pedir-uber
-description: Chama um Uber para uma pessoa (pelo nome ou apelido). Use when the user says "chama um Uber pro <nome>", "pede um Uber pra <nome/apelido>", "manda um Uber pro <pessoa>", or English equivalents ("get an Uber for <name>"). Add a --test flag (e.g. "/pedir-uber Elian --test") to send WhatsApp updates to the user's own number instead of the contact's. Looks up the person in contatos.json by fuzzy-matching name/apelidos; registers them if not found. Drives m.uber.com via browser automation (Claude in Chrome) since the Riders API isn't practically reachable for a personal project. Sends WhatsApp status updates in Brazilian Portuguese, fully autonomously after fare confirmation.
+description: Chama um Uber para uma pessoa (pelo nome ou apelido). Use when the user says "chama um Uber pro <nome>", "pede um Uber pra <nome/apelido>", "manda um Uber pro <pessoa>", or English equivalents ("get an Uber for <name>"). Add a --test flag (e.g. "/pedir-uber Elian --test") to send WhatsApp updates to the user's own number instead of the contact's. Looks up the person in contatos.json by fuzzy-matching name/apelidos; registers them if not found. Drives m.uber.com via browser automation (Claude in Chrome) since the Riders API isn't practically reachable for a personal project. Sends WhatsApp status updates in Brazilian Portuguese via the wacli CLI, fully autonomously after fare confirmation.
 ---
 
 # Pedir Uber
@@ -31,8 +31,9 @@ description: Chama um Uber para uma pessoa (pelo nome ou apelido). Use when the 
 
 ## Approach
 
-No API calls — drives `m.uber.com` with Claude in Chrome, using whatever
-Uber session is already logged into the browser.
+No Uber API calls — drives `m.uber.com` with Claude in Chrome, using
+whatever Uber session is already logged into the browser. WhatsApp goes
+through `wacli` (see "Sending a WhatsApp message" below), not a browser.
 
 **Contacts** live in `contatos.json` (same directory), keyed by id:
 
@@ -79,10 +80,9 @@ Nothing else differs: a test run still books and pays for a real ride.
    match → run "Registering a new contact" below, then continue to step 2.
 2. Load browser tools (`ToolSearch` for `mcp__claude-in-chrome__*`).
    Screenshots for everything — reading state and clicking.
-3. Open two tabs up front: Uber (step 4) and WhatsApp. WhatsApp Web
-   reloads its full ~3s splash screen on *every* `send?phone=...`
-   navigation, even repeats in the same run — no warm-session shortcut,
-   so don't bother pre-loading it.
+3. Open the Uber tab. WhatsApp doesn't need a tab at all — sending goes
+   through the `wacli` CLI (see "Sending a WhatsApp message" below), not
+   a browser.
 4. In the Uber tab, navigate straight to the contact's deep link — lands
    directly on the fare screen:
    `https://m.uber.com/go/product-selection?<deep_link_query>`
@@ -204,21 +204,24 @@ Triggered from step 1 when no match is found.
 
 ## Sending a WhatsApp message
 
-Use `web.whatsapp.com/send` directly (not `wa.me`, which adds a landing
-page) in the tab opened in step 3.
+Use the `wacli` CLI (https://wacli.sh) via Bash — not a browser. It speaks
+the WhatsApp Web linked-device protocol directly: no tab, no page load, no
+click, and its own exit code/JSON response is real ground truth for
+whether the send worked, unlike a screenshot-based verification.
 
-1. Navigate to `https://web.whatsapp.com/send?phone=<number>&text=<url-encoded message>`
-   — contact's `telefone` (real mode) or `5511989327233` (test mode).
-2. `wait` ~3s for the splash screen, then screenshot — message should be
-   pre-filled in the input box.
-3. Click the green send button (bottom-right) using screenshot
-   coordinates — this actually sends, no confirmation needed (Autonomy).
-4. **Verify the send landed before moving on.** Take one more
-   screenshot: the message should now show as a sent bubble (with a
-   checkmark), not still sitting in the input box. A click can silently
-   miss — e.g. a "message notifications are off" banner appearing right
-   then shifts the layout under the coordinates. If the text is still in
-   the input box, click send again. Don't chain the next action on an
-   unverified send.
-5. QR code instead of a chat → not logged in; stop and tell the user,
-   don't log in on their behalf.
+Assumes `wacli auth` has already linked the device — this is a one-time
+setup done outside this skill, not something to attempt here.
+
+1. Run:
+   ```
+   wacli send text --to <number> --message "<text>" --json
+   ```
+   — contact's `telefone` (real mode) or `5511989327233` (test mode). Add
+   `--allow-self` when sending to the test number specifically (WhatsApp
+   doesn't guarantee delivery to the linked account's own number
+   otherwise).
+2. Parse the JSON output. `{"success":true,...}` → sent, move on. Any
+   other result (non-zero exit, `"success":false`, or no valid JSON on
+   the last line of stdout) → the send failed; retry once, and if it
+   fails again, flag it to the *user* (not the contact) rather than
+   silently continuing as if it went through.

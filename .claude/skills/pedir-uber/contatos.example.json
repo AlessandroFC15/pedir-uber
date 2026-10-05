@@ -1,0 +1,11 @@
+{
+  "_comment": "Copy this file to contatos.json and fill in real contacts. contatos.json is gitignored on purpose - it holds real phone numbers and addresses and should never be committed.",
+  "exemplo": {
+    "nome": "Nome Exemplo",
+    "apelidos": ["apelido", "outro apelido"],
+    "telefone": "5511999999999",
+    "endereco_partida": "Endereço de partida padrão",
+    "endereco_destino": "Endereço de destino padrão",
+    "deep_link_query": "resolvido automaticamente na primeira corrida para este contato - veja 'Registering a new contact' em SKILL.md"
+  }
+}
