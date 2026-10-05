@@ -74,10 +74,13 @@ Nothing else differs: a test run still books and pays for a real ride.
 
 1. **Identify the person and mode.** Strip a leading/trailing `--test`
    flag from the request first (see Mode above) — whatever's left is the
-   name/alias to match. Fuzzy-match it against every contact's
+   name/alias to match. If `contatos.json` doesn't exist yet (first run),
+   treat it as having no contacts — don't error, don't ask the user to
+   create it. Fuzzy-match the name/alias against every contact's
    `nome`/`apelidos` in `contatos.json`. Confident match → step 2.
    Multiple plausible matches → ask which one via `AskUserQuestion`. No
-   match → run "Registering a new contact" below, then continue to step 2.
+   match (including an empty/missing file) → run "Registering a new
+   contact" below, then continue to step 2.
 2. Load browser tools (`ToolSearch` for `mcp__claude-in-chrome__*`).
    Screenshots for everything — reading state and clicking.
 3. Open the Uber tab. WhatsApp doesn't need a tab at all — sending goes
@@ -196,7 +199,8 @@ Triggered from step 1 when no match is found.
    back to the user and confirm via `AskUserQuestion` (Confirmar /
    Corrigir) before saving anything.
 5. On confirm: merge a new entry into `contatos.json` (read-modify-write,
-   don't clobber existing contacts) — short lowercase id, `nome`,
+   don't clobber existing contacts; create the file with just this entry
+   if it doesn't exist yet) — short lowercase id, `nome`,
    `apelidos` (include any alias implied by how the user referred to
    them), `telefone` (digits only, country code, no punctuation),
    `endereco_partida`/`endereco_destino` as given, and `deep_link_query`.
